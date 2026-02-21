@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<title>Admin Secret</title>
+</head>
+<body>
+
+<h2>Connexion Admin</h2>
+<input type="password" id="pwd" placeholder="Mot de passe">
+<button onclick="check()">Entrer</button>
+
+<ul id="list"></ul>
+
+<script type="module">
+import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
+import { getFirestore, collection, getDocs } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
+
+const firebaseConfig = {
+  apiKey: "AIzaSyA9xBR9PZrp4DJUokRcgUsB3rWzDbRehaQ",
+  authDomain: "pour-capucine.firebaseapp.com",
+  projectId: "pour-capucine",
+  storageBucket: "pour-capucine.firebasestorage.app",
+  messagingSenderId: "761681118829",
+  appId: "1:761681118829:web:c628dbcb1a6a6a14c7a164"
+};
+
+const app = initializeApp(firebaseConfig);
+const db = getFirestore(app);
+
+window.check = async function(){
+    if(document.getElementById("pwd").value === "1234"){
+        const snap = await getDocs(collection(db,"responses"));
+        snap.forEach(doc=>{
+            const li = document.createElement("li");
+            li.innerText = `${doc.data().type} → ${doc.data().value || "—"} (${doc.data().timestamp.toDateString ? doc.data().timestamp.toDateString() : doc.data().timestamp})`;
+            document.getElementById("list").appendChild(li);
+        });
+    } else { alert("Mot de passe incorrect"); }
+}
+</script>
+
+</body>
+</html>
