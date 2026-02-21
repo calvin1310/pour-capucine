@@ -59,7 +59,6 @@ button {
 }
 
 @keyframes fall { to { transform: translateY(110vh); opacity: 0; } }
-
 </style>
 </head>
 
@@ -68,10 +67,7 @@ button {
 <div class="container">
     <h1>Petite proposition ❤️</h1>
     <p>
-    Est-ce que tu peux et tu veux dormir chez moi vendredi soir ?  
-    Je te propose donc de venir dormir vendredi soir. Comme je travaille à l’ESF jusqu’à 20h et que le temps de rentrer à la maison ça peut être vers 22h-23h, voire minuit, tu peux venir directement chez moi un peu avant si tu veux.  
-    Mon père pourra t’ouvrir et tu pourras m’attendre dans ma chambre le temps que je rentre si jamais.  
-    Tu pourras aussi rester tout samedi à part si t'as encore du travaille, parce que ça fait longtemps qu’on ne s’est pas vus. 🥰
+    Est-ce que tu peux et tu veux dormir chez moi vendredi soir ? Je te propose donc de venir dormir vendredi soir. Comme je travaille à l’ESF jusqu’à 20h et que le temps de rentrer à la maison ça peut être vers 22h-23h, voire minuit, tu peux venir directement chez moi un peu avant si tu veux. Mon père pourra t’ouvrir et tu pourras m’attendre dans ma chambre le temps que je rentre si jamais. Tu pourras aussi rester tout samedi à part si t'as encore du travaille, parce que ça fait longtemps qu’on ne s’est pas vus. 🥰
     </p>
     
     <div id="countdown"></div>
@@ -83,6 +79,32 @@ button {
 </div>
 
 <script type="module">
+import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
+import { getFirestore, addDoc, collection } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
+
+const firebaseConfig = {
+  apiKey: "TA_API_KEY",
+  authDomain: "TON_DOMAINE.firebaseapp.com",
+  projectId: "TON_PROJECT_ID",
+  storageBucket: "TON_BUCKET.appspot.com",
+  messagingSenderId: "TON_SENDER_ID",
+  appId: "TON_APP_ID"
+};
+
+const app = initializeApp(firebaseConfig);
+const db = getFirestore(app);
+
+/* Compte à rebours */
+const friday = new Date("2026-02-27T20:00:00");
+function updateCountdown(){
+    const diff = friday - new Date();
+    const d = Math.floor(diff / (1000*60*60*24));
+    const h = Math.floor((diff/(1000*60*60))%24);
+    const m = Math.floor((diff/(1000*60))%60);
+    document.getElementById("countdown").innerText = `Plus que ${d}j ${h}h ${m}min ❤️`;
+}
+setInterval(updateCountdown,1000);
+updateCountdown();
 
 /* Coeurs qui tombent */
 function createHeart(){
@@ -96,14 +118,19 @@ function createHeart(){
 }
 setInterval(createHeart,500);
 
+/* Envoyer réponse Firebase */
+function sendResponse(type, value=""){
+    addDoc(collection(db,"responses"),{ type, value, timestamp:new Date() });
+}
 
 /* Bouton OUI */
 document.getElementById("yesBtn").addEventListener("click",()=>{
     sendResponse("oui","");
-    document.body.innerHTML="<h1 style='text-align:center;margin-top:40vh;'>J'ai trop hâte ❤️</h1>";
+    const container = document.querySelector(".container");
+    container.innerHTML = "<h1 style='text-align:center;margin-top:40vh;'>J'ai trop hâte ❤️</h1>";
 });
 
-/* Bouton NON qui fuit 20 secondes */
+/* Bouton NON qui fuit 30 secondes */
 const noBtn = document.getElementById("noBtn");
 let canClickNo = false;
 
@@ -118,20 +145,21 @@ function moveNoBtn(){
     }
 }
 
-/* On active la fuite seulement 20 secondes */
+/* Fuite 30 secondes */
 const moveInterval = setInterval(moveNoBtn,200);
 setTimeout(()=>{
     canClickNo = true;
     clearInterval(moveInterval);
     noBtn.style.left = "0px";
     noBtn.style.top = "0px";
-},40000);
+},30000);
 
 /* Quand elle clique sur NON */
 noBtn.addEventListener("click",()=>{
     if(canClickNo){
         sendResponse("non","");
-        document.body.innerHTML="<h1 style='text-align:center;margin-top:40vh;'>Ah, c'est dommage, une prochaine fois, dis-moi quand tu pourras ❤️</h1>";
+        const container = document.querySelector(".container");
+        container.innerHTML = "<h1 style='text-align:center;margin-top:40vh;'>Ah, c'est dommage, une prochaine fois, dis-moi quand tu pourras ❤️</h1>";
     }
 });
 </script>
